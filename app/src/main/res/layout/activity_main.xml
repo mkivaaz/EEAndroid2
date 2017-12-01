@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="androidee.com.eeandroid.MainActivity"
-    android:background="@drawable/coin">
+    tools:context="androidee.com.eeandroid.MainActivity">
 
     <LinearLayout
         android:background="#77000000"
@@ -21,6 +20,7 @@
             android:padding="5dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:visibility="gone"
             android:orientation="horizontal">
             <TextView
                 android:layout_width="0dp"
@@ -39,51 +39,8 @@
                 android:textColor="@android:color/white"
                 android:hint="Enter Name"/>
         </LinearLayout>
-        <LinearLayout
-            android:padding="5dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="Username:"
-                android:textSize="18sp"
-                android:textColor="@android:color/white"
-                android:layout_weight="1"/>
-            <EditText
-                android:id="@+id/usernameET"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:background="@android:color/transparent"
-                android:paddingLeft="5dp"
-                android:textColor="@android:color/white"
-                android:hint="Enter Username"/>
-        </LinearLayout>
-        <LinearLayout
-            android:padding="5dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="Password:"
-                android:textSize="18sp"
-                android:textColor="@android:color/white"
-                android:layout_weight="1"/>
-            <EditText
-                android:id="@+id/passET"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:background="@android:color/transparent"
-                android:paddingLeft="5dp"
-                android:textColor="@android:color/white"
-                android:inputType="textPassword"
-                android:hint="*********"/>
-        </LinearLayout>
+
+
         <LinearLayout
             android:id="@+id/emailBox"
             android:padding="5dp"
@@ -108,10 +65,36 @@
                 android:inputType="textEmailAddress"
                 android:hint="Enter Email Here"/>
         </LinearLayout>
+
+        <LinearLayout
+        android:padding="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Password:"
+            android:textSize="18sp"
+            android:textColor="@android:color/white"
+            android:layout_weight="1"/>
+        <EditText
+            android:id="@+id/passET"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:background="@android:color/transparent"
+            android:paddingLeft="5dp"
+            android:textColor="@android:color/white"
+            android:inputType="textPassword"
+            android:hint="*********"/>
+        </LinearLayout>
+
         <LinearLayout
             android:id="@+id/phoneBox"
             android:padding="5dp"
             android:layout_width="match_parent"
+            android:visibility="gone"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
             <TextView
@@ -135,6 +118,7 @@
         <LinearLayout
             android:id="@+id/bankBox"
             android:padding="5dp"
+            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
@@ -158,6 +142,7 @@
         <LinearLayout
             android:id="@+id/accBox"
             android:padding="5dp"
+            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
@@ -179,9 +164,40 @@
                 android:inputType="number"
                 android:hint="Enter Account No Here"/>
         </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/photoBox"
+            android:padding="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_gravity="center_vertical"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="IC No:"
+                android:textSize="18sp"
+                android:textColor="@android:color/white"
+                android:layout_weight="1"/>
+            <EditText
+                android:id="@+id/icET"
+                android:layout_gravity="center_vertical"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:background="@android:color/transparent"
+                android:hint="1234567891"
+                android:paddingLeft="5dp"
+                android:textColor="@android:color/white"
+                android:inputType="number"/>
+
+        </LinearLayout>
+
         <LinearLayout
             android:id="@+id/billBox"
             android:padding="5dp"
+            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
@@ -203,7 +219,7 @@
                 android:enabled="false"
                 android:paddingLeft="5dp"
                 android:textColor="@android:color/white"
-                android:inputType="number"/>
+                android:inputType="text"/>
             <Button
                 android:id="@+id/btnBill"
                 android:layout_marginLeft="2dp"
@@ -213,39 +229,7 @@
                 android:text="Pick"/>
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/photoBox"
-            android:padding="5dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_gravity="center_vertical"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="IC Photo:"
-                android:textSize="18sp"
-                android:textColor="@android:color/white"
-                android:layout_weight="1"/>
-            <EditText
-                android:id="@+id/icET"
-                android:layout_gravity="center_vertical"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:enabled="false"
-                android:paddingLeft="5dp"
-                android:textColor="@android:color/white"
-                android:inputType="number"/>
-            <Button
-                android:id="@+id/btnIC"
-                android:layout_marginLeft="2dp"
-                android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:layout_weight="1"
-                android:text="Pick"/>
-        </LinearLayout>
+
 
 
         <LinearLayout
@@ -281,6 +265,7 @@
             android:gravity="right"
             android:orientation="horizontal">
             <Button
+                android:visibility="gone"
                 android:id="@+id/btnSignUp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
