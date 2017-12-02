@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">EEAndroid</string>
+
+    <string-array name="bank_arrays">
+        <item>CIMB Bank Berhad</item>
+    </string-array>
 </resources>

@@ -8,18 +8,21 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.IdRes;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.webkit.MimeTypeMap;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
-import com.android.volley.NetworkResponse;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -33,17 +36,22 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int BILL_REQUEST_CODE = 1235;
-    private static final String URL_FOR_LOGIN = "https://4c249bf0.ngrok.io/users/sign_in.json";
+
+    private static final String BASE_URL = "https://b6a69293.ngrok.io";
+    private static final String URL_FOR_LOGIN =BASE_URL + "/users/sign_in.json";
+    private static final String URL_FOR_SIGNUP = BASE_URL + "/users.json";
     private static final String TAG = ".MainActivity";
     private Uri ImgURI;
 
-    LinearLayout nameBox, phoneBox, emailBox, bankBox, accBox, icBox, billBox;
-    EditText nameET, phoneET, emailET, passET, bankET, accET, icET, billET;
+    LinearLayout nameBox, phoneBox, emailBox, bankBox, accBox, icBox, billBox, conf_passBox, usernameBox, addBox;
+    EditText nameET, phoneET, emailET, passET, accET, icET, billET, conf_passET, usernameET, addET;
+    Spinner bankSpinner;
     Button billBtn, signupBtn, loginBtn;
     RadioButton rbSignup, rbLogin;
     RadioGroup rg;
@@ -61,15 +69,21 @@ public class MainActivity extends AppCompatActivity {
         accBox = (LinearLayout) findViewById(R.id.accBox);
         icBox = (LinearLayout) findViewById(R.id.photoBox);
         billBox = (LinearLayout) findViewById(R.id.billBox);
+        conf_passBox = (LinearLayout) findViewById(R.id.conf_passBox);
+        usernameBox = (LinearLayout) findViewById(R.id.usernameBox);
+        addBox = (LinearLayout) findViewById(R.id.addBox);
 
         nameET = (EditText) findViewById(R.id.nameET);
         phoneET = (EditText) findViewById(R.id.phoneET);
         emailET = (EditText) findViewById(R.id.emailET);
         passET = (EditText) findViewById(R.id.passET);
-        bankET = (EditText) findViewById(R.id.bankET);
+        bankSpinner = (Spinner) findViewById(R.id.bankSpinner);
         accET = (EditText) findViewById(R.id.accountET);
         icET = (EditText) findViewById(R.id.icET);
         billET = (EditText) findViewById(R.id.billET);
+        conf_passET = (EditText) findViewById(R.id.conf_passET);
+        usernameET = (EditText) findViewById(R.id.usernameET);
+        addET = (EditText) findViewById(R.id.addET);
 
         billBtn = (Button) findViewById(R.id.btnBill);
         signupBtn = (Button) findViewById(R.id.btnSignUp);
@@ -79,9 +93,32 @@ public class MainActivity extends AppCompatActivity {
         rbLogin = (RadioButton) findViewById(R.id.rbLogin);
         rbSignup = (RadioButton) findViewById(R.id.rbSignUp);
         rbLogin.setChecked(true);
+        String[] bank_array = {"CIMB Bank Berhad","Hong Leong Bank Berhad","Affin Bank Berhad","Alliance Bank Malaysia Berhad","AmBank (M) Berhad","Malayan Banking Berhad","Public Bank Berhad","RHB Bank Berhad","Affin Islamic Bank Berhad","Alliance Islamic Bank Berhad","AmIslamic Bank Berhad","Bank Islam Malaysia Berhad","Bank Muamalat Malaysia Berhad","CIMB Islamic Bank Berhad","Hong Leong Islamic Bank Berhad","Maybank Islamic Berhad","Public Islamic Bank Berhad","RHB Islamic Bank Berhad"};
+        List<String> banks = new ArrayList<>();
+        for (String bank : bank_array) {
+            banks.add(bank);
+        }
 
-        emailET.setText("silva_vino@hotmail.com");
-        passET.setText("dddddddD9_");
+        passET.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+                if(hasFocus){
+                    Toast.makeText(getBaseContext(),"Password must have 8 characters including at least one Capital,Number,Special Character",Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        conf_passET.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+                if(hasFocus){
+                    Toast.makeText(getBaseContext(),"Password must have 8 characters including at least one Capital,Number,Special Character",Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getBaseContext(),android.R.layout.simple_spinner_dropdown_item,banks);
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        bankSpinner.setAdapter(dataAdapter);
 
         rg.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -96,6 +133,9 @@ public class MainActivity extends AppCompatActivity {
                         icBox.setVisibility(View.GONE);
                         billBox.setVisibility(View.GONE);
                         signupBtn.setVisibility(View.GONE);
+                        conf_passBox.setVisibility(View.GONE);
+                        usernameBox.setVisibility(View.GONE);
+                        addBox.setVisibility(View.GONE);
                         loginBtn.setVisibility(View.VISIBLE);
                     }else{
                         loginBtn.setVisibility(View.GONE);
@@ -105,6 +145,9 @@ public class MainActivity extends AppCompatActivity {
                         accBox.setVisibility(View.VISIBLE);
                         icBox.setVisibility(View.VISIBLE);
                         billBox.setVisibility(View.VISIBLE);
+                        conf_passBox.setVisibility(View.VISIBLE);
+                        usernameBox.setVisibility(View.VISIBLE);
+                        addBox.setVisibility(View.VISIBLE);
                         signupBtn.setVisibility(View.VISIBLE);
                     }
                 }
@@ -137,19 +180,27 @@ public class MainActivity extends AppCompatActivity {
         signupBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 ArrayList signUpData = new ArrayList();
-                signUpData.add(nameET.getText().toString().trim());
-                signUpData.add(emailET.getText().toString().trim());
-                signUpData.add(passET.getText().toString().trim());
-                signUpData.add(phoneET.getText().toString().trim());
-                signUpData.add(bankET.getText().toString().trim());
-                signUpData.add(accET.getText().toString().trim());
-                signUpData.add(icET.getText().toString().trim());
+                boolean fieldsOK = validate(new EditText[]{emailET,passET,conf_passET,usernameET,nameET,icET,phoneET,addET,accET});
 
-                Log.d("arrayItems", signUpData.get(0).toString());
+                if(fieldsOK){
+                    signUpData.add(emailET.getText().toString().trim());
+                    signUpData.add(passET.getText().toString().trim());
+                    signUpData.add(conf_passET.getText().toString().trim());
+                    signUpData.add(usernameET.getText().toString().trim());
+                    signUpData.add(nameET.getText().toString().trim());
+                    signUpData.add(icET.getText().toString().trim());
+                    signUpData.add(phoneET.getText().toString().trim());
+                    signUpData.add(addET.getText().toString().trim());
+                    signUpData.add(bankSpinner.getSelectedItem().toString().trim());
+                    signUpData.add(accET.getText().toString().trim());
 
-
-                // Do Something Here....
+                    Toast.makeText(getBaseContext(),"Signing Up",Toast.LENGTH_SHORT).show();
+                    signUp(img,signUpData);
+                }else{
+                    Toast.makeText(getBaseContext(),"Please Fill all fields",Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -168,7 +219,6 @@ public class MainActivity extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-//            File file = new File(ImgURI.toString());
 
         }
     }
@@ -181,7 +231,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void loginUser(final String email, final String password){
-        String cancel_req_tag = "login";
 
         JSONObject params = new JSONObject();
         final JSONObject jsonObject = new JSONObject();
@@ -225,9 +274,10 @@ public class MainActivity extends AppCompatActivity {
                 return super.getHeaders();
             }
 
+
         };
 
-        AppSingleton.getInstance(getBaseContext()).addToRequestQueue(strReq,cancel_req_tag);
+        Volley.newRequestQueue(getBaseContext()).add(strReq);
 
     }
 
@@ -247,13 +297,43 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Sign up volley here
-    private void signUp(final Bitmap bitmap){
-        VolleyMultipartRequest volleyMultipartRequest = new VolleyMultipartRequest(Request.Method.POST, URL_FOR_LOGIN, new Response.Listener<NetworkResponse>() {
+    private void signUp(final Bitmap bitmap, ArrayList signUpData){
+        JSONObject params = new JSONObject();
+        final JSONObject jsonObject = new JSONObject();
+        try {
+            params.put("email",signUpData.get(0));
+            params.put("password",signUpData.get(1));
+            params.put("password_confirmation",signUpData.get(2));
+            params.put("username",signUpData.get(3));
+            params.put("name",signUpData.get(4));
+            params.put("ic",signUpData.get(5));
+            params.put("hp_num",signUpData.get(6));
+            params.put("address",signUpData.get(7));
+            params.put("bank_name",signUpData.get(8));
+            params.put("bank_account",signUpData.get(9));
+            params.put("verification_document", "data:image/png;base64," + Base64.encodeToString(getFileDataFromDrawable(bitmap),Base64.DEFAULT));
+
+            jsonObject.put("user",params);
+            Log.d("test2",jsonObject.getJSONObject("user").getString("verification_document").toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+        JsonObjectRequest strReq = new JsonObjectRequest(Request.Method.POST, URL_FOR_SIGNUP,jsonObject, new Response.Listener<JSONObject>() {
             @Override
-            public void onResponse(NetworkResponse response) {
+            public void onResponse(JSONObject jObj) {
                 try {
-                    JSONObject obj = new JSONObject(new String(response.data));
-                    Toast.makeText(getApplicationContext(), obj.getString("message"), Toast.LENGTH_SHORT).show();
+                    String status = jObj.getString("status");
+                    Log.d("test",jObj.toString());
+                    if(status.equals("signed_up")){
+                        Toast.makeText(getBaseContext(),"SignUp Successful",Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(getBaseContext(),HomeActivity.class));
+                    }else{
+                        JSONObject jsonObject1 = jObj.getJSONObject("errors");
+                        Toast.makeText(getBaseContext(),"SignUp Failed",Toast.LENGTH_SHORT).show();
+                    }
+
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -261,25 +341,34 @@ public class MainActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "SignUp Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),error.getMessage(), Toast.LENGTH_LONG).show();
             }
         }){
             @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> params = new HashMap<>();
-                //Add params here
-                return params;
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> headers = new HashMap<String, String>();
+                headers.put("Content-Type", "application/json; charset=utf-8");
+                return super.getHeaders();
             }
 
-            @Override
-            protected Map<String, DataPart> getByteData() throws AuthFailureError {
-                Map<String, DataPart> params = new HashMap<>();
-                long imagename = System.currentTimeMillis();
-                params.put("img", new DataPart(imagename + ".png", getFileDataFromDrawable(bitmap)));
-                return params;
-            }
+
         };
+        strReq.setRetryPolicy(new DefaultRetryPolicy(
+                0,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        Volley.newRequestQueue(getBaseContext()).add(strReq);
 
-        Volley.newRequestQueue(getBaseContext()).add(volleyMultipartRequest);
+    }
+
+    private boolean validate(EditText[] fields){
+        for(int i = 0; i < fields.length; i++){
+            EditText currentField = fields[i];
+            if(currentField.getText().toString().length() <= 0){
+                return false;
+            }
+        }
+        return true;
     }
 }
