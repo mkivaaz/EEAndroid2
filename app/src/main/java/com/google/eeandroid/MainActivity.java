@@ -1,7 +1,10 @@
-package androidee.com.eeandroid;
+package com.google.eeandroid;
 
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -28,16 +31,30 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.facebook.AccessTokenTracker;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.ProfileTracker;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import androidee.com.eeandroid.R;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -56,12 +73,17 @@ public class MainActivity extends AppCompatActivity {
     RadioButton rbSignup, rbLogin;
     RadioGroup rg;
     Bitmap img;
+    LoginButton fbLogin;
+    CallbackManager callbackManager;
+
+    AccessTokenTracker accessTokenTracker;
+    ProfileTracker profileTracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+//        privateKey();
         nameBox = (LinearLayout) findViewById(R.id.nameBox);
         phoneBox = (LinearLayout) findViewById(R.id.phoneBox);
         emailBox = (LinearLayout) findViewById(R.id.emailBox);
@@ -88,10 +110,16 @@ public class MainActivity extends AppCompatActivity {
         billBtn = (Button) findViewById(R.id.btnBill);
         signupBtn = (Button) findViewById(R.id.btnSignUp);
         loginBtn = (Button) findViewById(R.id.btnLogin);
+        fbLogin = findViewById(R.id.fbLogin);
 
         rg = (RadioGroup) findViewById(R.id.rbGroup);
         rbLogin = (RadioButton) findViewById(R.id.rbLogin);
         rbSignup = (RadioButton) findViewById(R.id.rbSignUp);
+
+        callbackManager = CallbackManager.Factory.create();
+        fbLogin.setReadPermissions(Arrays.asList(
+                "public_profile", "email"));
+
         rbLogin.setChecked(true);
         String[] bank_array = {"CIMB Bank Berhad","Hong Leong Bank Berhad","Affin Bank Berhad","Alliance Bank Malaysia Berhad","AmBank (M) Berhad","Malayan Banking Berhad","Public Bank Berhad","RHB Bank Berhad","Affin Islamic Bank Berhad","Alliance Islamic Bank Berhad","AmIslamic Bank Berhad","Bank Islam Malaysia Berhad","Bank Muamalat Malaysia Berhad","CIMB Islamic Bank Berhad","Hong Leong Islamic Bank Berhad","Maybank Islamic Berhad","Public Islamic Bank Berhad","RHB Islamic Bank Berhad"};
         List<String> banks = new ArrayList<>();
@@ -137,8 +165,10 @@ public class MainActivity extends AppCompatActivity {
                         usernameBox.setVisibility(View.GONE);
                         addBox.setVisibility(View.GONE);
                         loginBtn.setVisibility(View.VISIBLE);
+                        fbLogin.setVisibility(View.VISIBLE);
                     }else{
                         loginBtn.setVisibility(View.GONE);
+                        fbLogin.setVisibility(View.GONE);
                         nameBox.setVisibility(View.VISIBLE);
                         phoneBox.setVisibility(View.VISIBLE);
                         bankBox.setVisibility(View.VISIBLE);
@@ -163,6 +193,44 @@ public class MainActivity extends AppCompatActivity {
                 intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
                 startActivityForResult(intent.createChooser(intent,"Select Image"),BILL_REQUEST_CODE);
+            }
+        });
+
+        fbLogin.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                GraphRequest request = GraphRequest.newMeRequest(
+                        loginResult.getAccessToken(),
+                        new GraphRequest.GraphJSONObjectCallback() {
+                            @Override
+                            public void onCompleted(JSONObject object, GraphResponse response) {
+                                Log.v("LoginActivity", response.toString());
+
+                                // Application code
+                                try {
+                                    String email = object.getString("email");
+                                    String name = object.getString("name");
+                                    Toast.makeText(getBaseContext(),name,Toast.LENGTH_SHORT).show();
+                                    Log.v("LoginActivity", object.toString());
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                Bundle parameters = new Bundle();
+                parameters.putString("fields", "id,name,email");
+                request.setParameters(parameters);
+                request.executeAsync();
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+
             }
         });
 
@@ -209,7 +277,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
+        callbackManager.onActivityResult(requestCode, resultCode, data);
         if (requestCode == BILL_REQUEST_CODE && resultCode == RESULT_OK && data != null && data.getData() != null ){
             ImgURI = data.getData();
 
@@ -370,5 +438,22 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return true;
+    }
+
+    public void privateKey(){
+        try {
+            PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_SIGNATURES);
+
+            for(Signature signature : packageInfo.signatures){
+                MessageDigest md = MessageDigest.getInstance("SHA");
+                md.update(signature.toByteArray());
+                Log.d("KeyHash:",Base64.encodeToString(md.digest(),Base64.DEFAULT));
+            }
+
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -1,7 +1,9 @@
-package androidee.com.eeandroid;
+package com.google.eeandroid;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import androidee.com.eeandroid.R;
 
 public class HomeActivity extends AppCompatActivity {
 

@@ -1,4 +1,4 @@
-package androidee.com.eeandroid;
+package com.google.eeandroid;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
